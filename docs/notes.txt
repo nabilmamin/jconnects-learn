@@ -1,0 +1,8 @@
+I could be the event coordinator. I can organize with venues to secure availability. I can market. I already did some marketing last year with mailchimp and had a great reception to the idea. 
+We can launch the webapp and gauge interest by having people sign up for events sort of like a pre-sale, at a reduced price. Then run with that program and iterate and improve. We would use it as beta testing. 
+We can strengthen the idea through feedback. We can continue to iterate the app. 
+We can explore different neighborhoods (zip code) and cities. 
+We can run helper functions to group known zipcodes into neighborhoods. These neighborhoods would be identified manually. Along side the venue curation. 
+We can recommend night caps (bars and other related venues) for the table of six to continue their night. 
+We may not do the big social mixer every event night. 
+The biggest thing is having the landing page and generating interest and data. How many users sign up, what dates do they prefer. Which cities are the most popular. 
