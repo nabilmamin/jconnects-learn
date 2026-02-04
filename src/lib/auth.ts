@@ -1,9 +1,12 @@
 import bcrypt from 'bcrypt';
-import { SignJWT, jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
 import { getUserById } from '@/lib/db';
+import { createToken, verifyToken } from '@/lib/jwt';
 
-const SALT_ROUNDS=10;
+// Re-export JWT functions so existing imports still work
+export { createToken, verifyToken };
+
+const SALT_ROUNDS = 10;
 
 export async function hashPassword(password: string): Promise<string> {
     return bcrypt.hash(password, SALT_ROUNDS);
@@ -12,29 +15,6 @@ export async function hashPassword(password: string): Promise<string> {
 export async function verifyPassword(password: string, hash: string): Promise<boolean> {
     return bcrypt.compare(password, hash);
 }
-
-const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
-
-type TokenPayload = {
-    userId: string;
-    email: string;
-};
-
-export async function createToken(payload: TokenPayload): Promise<string> {
-    return new SignJWT(payload)
-        .setProtectedHeader({ alg: 'HS256'})
-        .setExpirationTime('7d')
-        .sign(JWT_SECRET)
-}
-
-export async function verifyToken(token: string): Promise<TokenPayload | null> {
-    try {
-        const { payload } = await jwtVerify(token, JWT_SECRET);
-        return payload as TokenPayload;
-    } catch {
-        return null;
-    }
-};
 
 // Check who is currently logged in
 export async function getCurrentUser() {
@@ -55,6 +35,6 @@ export async function getCurrentUser() {
         return null; 
     }
 
-    return { id: user.id, email: user.email, name: user.name };
+    return { id: user.id, email: user.email, name: user.name, role: user.role };
 
 }

@@ -18,13 +18,13 @@
 | 2 | 2.1 Supabase Setup | COMPLETED | Jan 27, 2026 |
 | 2 | 2.2 Schema Design | COMPLETED | Jan 27, 2026 |
 | 2 | 2.3 Data Access Layer | COMPLETED | Feb 1, 2026 |
-| 3 | 3.1 JWT Authentication | IN PROGRESS | - |
-| 3 | 3.2 Role-Based Access | Not Started | - |
-| 4 | 4.1 Stripe Checkout | Not Started | - |
-| 4 | 4.2 Webhooks | Not Started | - |
-| 4 | 4.3 Stripe Connect | Not Started | - |
-| 5 | 5.1 Email with Resend | Not Started | - |
-| 5 | 5.2 SMS with Twilio | Not Started | - |
+| 3 | 3.1 JWT Authentication | COMPLETED | Feb 3, 2026 |
+| 3 | 3.2 Role-Based Access | COMPLETED | Feb 3, 2026 |
+| 4 | 4.1 Stripe Checkout | COMPLETED | Feb 4, 2026 |
+| 4 | 4.2 Webhooks | COMPLETED | Feb 4, 2026 |
+| 4 | 4.3 Stripe Connect | DEFERRED | - |
+| 5 | 5.1 Email with Resend | COMPLETED | Feb 4, 2026 |
+| 5 | 5.2 SMS with Twilio | COMPLETED | Feb 4, 2026 |
 | 6 | 6.1 Environment & Secrets | Not Started | - |
 | 6 | 6.2 Deployment | Not Started | - |
 | 6 | 6.3 Error Handling | Not Started | - |
@@ -410,6 +410,29 @@
 
 ---
 
+### Session 4 - February 3, 2026
+
+**Completed Lesson 3.1 - JWT Authentication:**
+- Created all 4 auth API routes:
+  - `POST /api/auth/signup` - Create account, hash password, set cookie
+  - `POST /api/auth/login` - Verify credentials, set cookie
+  - `GET /api/auth/me` - Get current user from cookie
+  - `POST /api/auth/logout` - Delete cookie
+- Added `getCurrentUser()` helper in auth.ts
+- Added `getUserById()` to db.ts
+
+**Key concepts implemented:**
+- HTTP-only cookies with secure flags (httpOnly, secure, sameSite)
+- Cookie maxAge matching JWT expiration (7 days)
+- Input validation on API routes
+- Consistent error responses (don't reveal if email exists on login)
+
+**Phase 3.1 Complete!**
+
+**Next session:** Test auth endpoints, then start 3.2 - Role-Based Access Control
+
+---
+
 ## Reference Commands
 
 ```bash
@@ -444,4 +467,105 @@ npm run lint
 | Multi-city | city/state/zip on events | Supports expansion (JC → Hoboken) | More fields to manage |
 | Table status | active/cancelled column | Handle capacity decreases gracefully | Extra state to manage |
 | Events table | Keep it (vs derive from availability) | FK target for tickets, referential integrity | One more table |
+
+---
+
+### Session 5 - February 3, 2026 (continued)
+
+**Completed Lesson 3.2 - Role-Based Access Control:**
+- Added `role` column to users table (public, coordinator, admin)
+- Added `status` column for user moderation (active, flagged, banned)
+- Added `notes` column for staff to log complaints/issues
+- Updated TypeScript types with `UserRole` and `UserStatus`
+- Created `jwt.ts` for Edge-compatible JWT functions
+- Created middleware (`src/middleware.ts`) for route protection
+- Created protected pages: `/account`, `/tickets`, `/coordinator`, `/admin`
+- Created `/unauthorized` page for access denied
+
+**Key concepts explained:**
+- JWT vs Cookie vs Token relationships
+- Next.js middleware and Edge runtime
+- Why bcrypt doesn't work in Edge (native Node.js module)
+- File splitting to separate Edge-compatible code from Node.js code
+- Route protection with matchers
+- Role-based authorization vs authentication
+
+**Auth UI completed:**
+- `/signup` - Create account with link to login
+- `/login` - Sign in with link to signup
+- `/logout` - Confirmation page with logout button
+
+**Phase 3 Complete!**
+
+---
+
+### Session 6 - February 4, 2026
+
+**Started Lesson 4.1 - Stripe Checkout:**
+- Created Stripe account and added API keys to `.env.local`
+- Installed Stripe SDK (`npm install stripe`)
+- Created `src/lib/stripe.ts` - Stripe client configuration
+- Created `POST /api/checkout` - Creates Stripe Checkout Sessions
+- Created `/checkout/success` and `/checkout/cancel` pages
+- Created `BuyTicketButton` component with quantity selector
+- Updated `/events/[id]` page with event details and buy button
+- Updated `/events` page with clickable event cards
+
+**Schema changes:**
+- Added `price` column to events table (in cents, default $10.00)
+- Updated Event type in `types.ts`
+
+**Key concepts explained:**
+- Stripe Checkout flow (redirect to Stripe's hosted page)
+- Why we store price in cents (avoid floating point issues)
+- `events.price` vs `tickets.price` (current price vs frozen at purchase)
+- Dynamic routes with `[id]` parameter
+- Metadata in Stripe sessions (for webhook processing)
+
+**Teaching style adjusted:**
+- User prefers seeing completed code then having it explained
+- Walk through files one at a time
+
+**Remaining for 4.1:**
+**Completed Lesson 4.2 - Webhooks:**
+- Installed Stripe CLI for local webhook testing
+- Created `POST /api/webhooks/stripe` endpoint
+- Implemented signature verification for security
+- Created `createTicket` function in db.ts
+- Webhook creates ticket records on successful payment
+
+**Key concepts explained:**
+- Webhooks as server-to-server communication
+- Signature verification (prevents fake requests)
+- Stripe CLI as a tunnel for local development
+- Why we can't trust the success page alone
+
+**Deferred for later:**
+- Guest info collection (will add to /tickets page)
+- Stripe Connect (4.3) - Not needed for single-coordinator model
+
+**Phase 4 Complete!**
+
+**Completed Lesson 5.1 - Email with Resend:**
+- Installed Resend SDK
+- Created `src/lib/email.ts` with `sendTicketConfirmation` function
+- Integrated email sending into Stripe webhook
+- Tested successfully - confirmation emails sent after purchase
+
+**Completed Lesson 5.2 - SMS with Twilio:**
+- Installed Twilio SDK
+- Created `src/lib/sms.ts` with `sendEventReminder` and `sendTableAssignment` functions
+- Not tested (Twilio requires verification with live website)
+
+**Additional features built:**
+- Added `reservation_name` column to tables
+- Created `src/lib/table-names.ts` for elegant table naming ("Table Crimson", "Table Amber", etc.)
+- 30 color names with fallback suffix for large venues
+
+**Key concepts explained:**
+- Transactional email vs marketing email
+- SMS character limits and best practices
+- Pattern: all communication APIs follow same structure (client, params, send)
+
+**Phase 5 Complete!**
 

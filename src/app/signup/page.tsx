@@ -36,6 +36,7 @@ export default function SignupPage() {
 
         // On success, redirect to home
         router.push('/');
+        router.refresh();
     }
 
     return (
@@ -75,7 +76,23 @@ export default function SignupPage() {
                 required
                 className="w-full px-3 py-2 border rounded-md" />
             </div>
+            {error && (
+              <p className="text-red-600 text-sm">{error}</p>
+            )}
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-blue-400"
+            >
+              {loading ? 'Signing up...' : 'Sign Up'}
+            </button>
           </form>
+          <p className="mt-4 text-sm text-gray-600">
+            Already have an account?{' '}
+            <Link href="/login" className="text-blue-600 hover:underline">
+              Log in
+            </Link>
+          </p>
         </div>
     );
 

@@ -5,12 +5,18 @@ export type Setting = {
   value: string;
 };
 
+export type UserRole = 'public' | 'coordinator' | 'admin';
+export type UserStatus = 'active' | 'flagged' | 'banned';
+
 export type User = {
   id: string;
   email: string;
   password_hash: string;
   name: string;
   phone: string | null;
+  role: UserRole;
+  status: UserStatus;
+  notes: string | null;
   created_at: string;
 };
 
@@ -44,6 +50,7 @@ export type Event = {
   city: string;
   state: string;
   zip: string;
+  price: number;
   status: 'published' | 'cancelled' | 'completed';
   created_at: string;
 };
@@ -54,6 +61,7 @@ export type Table = {
   availability_id: string;
   status: 'active' | 'cancelled';
   dinner_time: string | null;
+  reservation_name: string | null;
   created_at: string;
 };
 

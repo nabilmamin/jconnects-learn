@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
         );
     }
 
-    const token = await createToken({ userId: user.id, email: user.email });
+    const token = await createToken({ userId: user.id, email: user.email, role: user.role });
 
     const cookieStore = await cookies();
     cookieStore.set('token', token, {
@@ -40,6 +40,6 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json({
-        user: { id: user.id, email: user.email, name: user.name }
+        user: { id: user.id, email: user.email, name: user.name, role: user.role }
     })
 }

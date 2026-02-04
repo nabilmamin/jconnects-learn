@@ -28,8 +28,8 @@ export async function POST(request: NextRequest) {
     const passwordHash = await hashPassword(password);
     const user = await createUser(email, passwordHash, name);
 
-    // Creawte JWT
-    const token = await createToken({ userId: user.id, email: user.email });
+    // Create JWT (new users default to 'public' role)
+    const token = await createToken({ userId: user.id, email: user.email, role: user.role });
 
     // Set HTTP Only Cookie
     const cookieStore = await cookies();
@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
 
     // Return success (don't send password_hash!)
     return NextResponse.json({
-        user: { id: user.id, email: user.email, name: user.name }
+        user: { id: user.id, email: user.email, name: user.name, role: user.role }
     });
 }
 

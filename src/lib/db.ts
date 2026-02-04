@@ -183,9 +183,38 @@ export async function getTicketById(id: string): Promise<(Ticket & { event: Even
         .select(`*, event:events(*)`)
         .eq('id', id)
         .single();
-        
+
     if (error){
         return null
+    }
+
+    return data;
+}
+
+type CreateTicketParams = {
+    userId: string;
+    eventId: string;
+    price: number;
+    stripePaymentId: string;
+};
+
+export async function createTicket(params: CreateTicketParams): Promise<Ticket> {
+    const supabase = await createClient();
+
+    const { data, error } = await supabase
+        .from('tickets')
+        .insert({
+            user_id: params.userId,
+            event_id: params.eventId,
+            price: params.price,
+            stripe_payment_id: params.stripePaymentId,
+            status: 'paid',
+        })
+        .select()
+        .single();
+
+    if (error) {
+        throw new Error(error.message);
     }
 
     return data;
