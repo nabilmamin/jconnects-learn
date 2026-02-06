@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
 import { createTicket, getUserById, getEventById } from '@/lib/db';
 import { sendTicketConfirmation } from '@/lib/email';
+import { logger } from '@/lib/logger';
 import Stripe from 'stripe';
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
@@ -16,7 +17,7 @@ export async function POST(request: NextRequest) {
     try {
         event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
     } catch (err) {
-        console.error('Webhook signature verification failed:', err);
+        logger.error('Webhook signature verification failed', err instanceof Error ? err : new Error(String(err)));
         return NextResponse.json(
             { error: 'Invalid signature' },
             { status: 400 }
@@ -35,39 +36,62 @@ export async function POST(request: NextRequest) {
         const stripePaymentId = session.payment_intent as string;
 
         if (!userId || !eventId) {
-            console.error('Missing metadata in checkout session');
+            logger.error('Missing metadata in checkout session', undefined, {
+                sessionId: session.id,
+            });
             return NextResponse.json(
                 { error: 'Missing metadata' },
                 { status: 400 }
             );
         }
 
-        // Create ticket(s) in our database
-        for (let i = 0; i < quantity; i++) {
-            await createTicket({
+        try {
+            // Create ticket(s) in our database
+            for (let i = 0; i < quantity; i++) {
+                await createTicket({
+                    userId,
+                    eventId,
+                    price: pricePerTicket,
+                    stripePaymentId,
+                });
+            }
+
+            logger.info('Tickets created', { userId, eventId, quantity });
+
+            // Send confirmation email
+            const user = await getUserById(userId);
+            const dinnerEvent = await getEventById(eventId);
+
+            if (user && dinnerEvent) {
+                try {
+                    await sendTicketConfirmation({
+                        to: user.email,
+                        customerName: user.name,
+                        eventCity: dinnerEvent.city,
+                        eventDate: dinnerEvent.date,
+                        quantity,
+                        totalPrice: pricePerTicket * quantity,
+                    });
+                    logger.info('Confirmation email sent', { email: user.email });
+                } catch (emailError) {
+                    // Log but don't fail the webhook - tickets were created successfully
+                    logger.error('Failed to send confirmation email', emailError instanceof Error ? emailError : new Error(String(emailError)), {
+                        userId,
+                        email: user.email,
+                    });
+                }
+            }
+        } catch (error) {
+            logger.error('Failed to process checkout webhook', error instanceof Error ? error : new Error(String(error)), {
+                sessionId: session.id,
                 userId,
                 eventId,
-                price: pricePerTicket,
-                stripePaymentId,
             });
-        }
-
-        console.log(`Created ${quantity} ticket(s) for user ${userId}`);
-
-        // Send confirmation email
-        const user = await getUserById(userId);
-        const dinnerEvent = await getEventById(eventId);
-
-        if (user && dinnerEvent) {
-            await sendTicketConfirmation({
-                to: user.email,
-                customerName: user.name,
-                eventCity: dinnerEvent.city,
-                eventDate: dinnerEvent.date,
-                quantity,
-                totalPrice: pricePerTicket * quantity,
-            });
-            console.log(`Sent confirmation email to ${user.email}`);
+            // Return 500 so Stripe will retry the webhook
+            return NextResponse.json(
+                { error: 'Failed to process payment' },
+                { status: 500 }
+            );
         }
     }
 

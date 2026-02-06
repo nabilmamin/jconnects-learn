@@ -25,9 +25,9 @@
 | 4 | 4.3 Stripe Connect | DEFERRED | - |
 | 5 | 5.1 Email with Resend | COMPLETED | Feb 4, 2026 |
 | 5 | 5.2 SMS with Twilio | COMPLETED | Feb 4, 2026 |
-| 6 | 6.1 Environment & Secrets | Not Started | - |
-| 6 | 6.2 Deployment | Not Started | - |
-| 6 | 6.3 Error Handling | Not Started | - |
+| 6 | 6.1 Environment & Secrets | COMPLETED | Feb 5, 2026 |
+| 6 | 6.2 Deployment | COMPLETED | Feb 5, 2026 |
+| 6 | 6.3 Error Handling | COMPLETED | Feb 5, 2026 |
 
 ---
 
@@ -568,4 +568,36 @@ npm run lint
 - Pattern: all communication APIs follow same structure (client, params, send)
 
 **Phase 5 Complete!**
+
+---
+
+### Session 7 - February 5, 2026
+
+**Completed Lesson 6.1 - Environment Variables & Secrets:**
+- Configured all environment variables on Vercel
+- Managed API keys for Supabase, Stripe, Resend, Twilio
+
+**Completed Lesson 6.2 - Deployment:**
+- Deployed application to Vercel
+- Updated Stripe webhook secret to point to production URL
+
+**Completed Lesson 6.3 - Error Handling & Monitoring:**
+- Created `src/app/error.tsx` - Error boundary for page crashes
+- Created `src/app/global-error.tsx` - Fallback for root layout errors
+- Created `src/app/loading.tsx` - Default loading skeleton
+- Created `src/app/events/loading.tsx` - Events-specific loading skeleton
+- Created `src/app/not-found.tsx` - Custom 404 page
+- Created `src/lib/logger.ts` - Structured JSON logging utility
+- Added try/catch + logging to all API routes
+
+**Key concepts explained:**
+- Next.js special files: error.tsx, loading.tsx, not-found.tsx, global-error.tsx
+- Error boundaries must be Client Components
+- Closest ancestor wins (child loading.tsx overrides parent)
+- Skeleton loaders with Tailwind's animate-pulse
+- Structured JSON logging for production observability
+
+**Phase 6 Complete! All phases finished.**
+
+**Next session:** Review `src/lib/logger.ts` in detail
 
