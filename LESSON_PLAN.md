@@ -28,6 +28,8 @@
 | 6 | 6.1 Environment & Secrets | COMPLETED | Feb 5, 2026 |
 | 6 | 6.2 Deployment | COMPLETED | Feb 5, 2026 |
 | 6 | 6.3 Error Handling | COMPLETED | Feb 5, 2026 |
+| 7 | 7.1 Testing with Vitest | COMPLETED | Feb 7, 2026 |
+| 7 | 7.2 Rate Limiting | DEFERRED | - |
 
 ---
 
@@ -599,5 +601,90 @@ npm run lint
 
 **Phase 6 Complete! All phases finished.**
 
-**Next session:** Review `src/lib/logger.ts` in detail
+---
 
+### Session 8 - February 6, 2026
+
+**Reviewed `src/lib/logger.ts` in detail:**
+- Walked through every section: types, `formatLog`, exported `logger` object
+- Union types (`LogLevel`) restrict values to known set
+- Index signatures (`LogContext`) allow flexible key-value context
+- Spread operator merges context into flat log object (better for log tool indexing)
+- `.error()` has different signature — accepts `Error` object, extracts name/message/stack
+- All output is `JSON.stringify` — machine-parseable, searchable in log platforms
+
+**Key concepts explained:**
+- Where `console.log` output goes: terminal locally, Vercel Logs in production
+- Local logs are ephemeral (gone when terminal closes)
+- Vercel free tier keeps logs ~1 hour, viewable in dashboard Logs tab
+- JSON structured logs are searchable/filterable vs plain text strings
+- Production observability services: Sentry (error alerts), Datadog (log storage/search), LogRocket (session replay)
+- The logger abstraction lets you swap internals later without changing callers
+
+**Started Lesson 7: Introduction to Testing**
+- Discussed why testing matters more than rate limiting (you're more likely to break your own app than get attacked)
+- Planned 6-step lesson: pure functions → spies → async/env → module mocking → API routes → components
+- Installed test dependencies: vitest, @vitejs/plugin-react, jsdom, @testing-library/react, @testing-library/jest-dom
+- Explained vitest.config.ts line by line (jsdom, globals, setupFiles, path alias)
+- Did NOT create any files yet — paused before writing vitest.config.ts
+
+**Next session:** Create vitest.config.ts, then vitest.setup.ts, then start Step 1 (table-names.test.ts)
+
+---
+
+### Session 9 - February 7, 2026
+
+**Completed Lesson 7.1 - Testing with Vitest:**
+- Created `vitest.config.ts` (jsdom environment, globals, path aliases, setup file)
+- Created `vitest.setup.ts` (testing-library matchers, vitest globals type reference)
+- Added `"test": "vitest"` script to package.json
+
+**Test files created (25 tests total, all passing):**
+- `src/lib/table-names.test.ts` (8 tests) - pure function testing, edge cases, wraparound, uniqueness
+- `src/lib/auth.test.ts` (5 tests) - password hashing, salt verification, correct/wrong password
+- `src/lib/jwt.test.ts` (6 tests) - token creation, round-trip verification, tampered/invalid tokens
+- `src/lib/logger.test.ts` (6 tests) - structured JSON output, log levels, error formatting, context merging
+
+**Key concepts explained:**
+- Arrange / Act / Assert pattern
+- `describe` blocks for grouping, `test` blocks for individual cases
+- Assertions: `toBe`, `toEqual`, `toHaveLength`, `toMatch`, `.not`
+- Async tests with `await`
+- What a failing test looks like (diff, line number, surrounding code)
+- Tests don't run automatically — `npm test` is manual, CI/CD automates it
+- Vitest vs Jest (Vitest is faster, built for Vite/modern tooling)
+- Co-located test files vs separate `tests/` folder (chose co-located)
+- Triple-slash directives for type definitions
+
+**Lesson 7.2 - Rate Limiting: DEFERRED**
+- Discussed what rate limiting is (X requests per Y seconds per IP)
+- Discussed the serverless problem (in-memory doesn't work across Vercel instances)
+- Recommended Upstash Redis when ready (free tier, ~20 lines of code)
+- Deferred until real traffic warrants it
+
+**LESSON PLAN COMPLETE.**
+
+---
+
+## Deferred Topics (for production build)
+
+| Topic | Why Deferred | When to Revisit |
+|-------|-------------|-----------------|
+| Stripe Connect (4.3) | Single-coordinator model doesn't need it | If adding multiple coordinators with revenue split |
+| Rate Limiting (7.2) | Adds complexity, not needed pre-launch | Before public launch or when getting real traffic |
+| CI/CD (GitHub Actions) | Solo developer, manual `npm test` is fine | When collaborating with others or wanting automated deploy gates |
+
+---
+
+## What This Repo Can Be Reused For
+
+This project serves as a **starter template** for any full-stack Next.js app. Reusable pieces:
+- JWT authentication with HTTP-only cookies
+- Role-based access control with middleware
+- Supabase client setup (browser + server)
+- Stripe Checkout + webhook handling
+- Email (Resend) and SMS (Twilio) integration
+- Structured logging
+- Error boundaries and loading states
+- Vitest test setup with 25 baseline tests
+- Environment variable management for Vercel
